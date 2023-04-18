@@ -69,7 +69,7 @@ def reliable_receive(conn) -> bytes:
         except:
             return False
 
-def run(HOST:str,PORT:int):
+def run(HOST:str,PORT:int,ansvwer:bool=True):
     def reliable_send(data: bytes) -> None:
         """
         Функция отправки данных в сокет
@@ -88,7 +88,8 @@ def run(HOST:str,PORT:int):
     # Port to listen on (non-privileged ports are > 1023)
     while True:
         with socket.socket(socket.AF_INET,
-                           socket.SOCK_STREAM) as s:  # создаётся объект сокета, которым поддерживается тип контекстного менеджера, который используется в операторе with. Вызывать s.close() не нужно
+                           socket.SOCK_STREAM) as s:  # создаётся объект сокета, которым поддерживается тип
+            # контекстного менеджера, который используется в операторе with. Вызывать s.close() не нужно
             # AF_INET — это семейство интернет-адресов для IPv4
             # SOCK_STREAM — это тип сокета для TCP и протокол, который будет использоваться для передачи сообщений в сети.
             s.bind((HOST, PORT))
@@ -127,7 +128,8 @@ def run(HOST:str,PORT:int):
                     try:
                         reliable_send(response)
                         try:
-                            print(f'Answer: {pickle.loads(response)[:5]}', end='\n\n')
+                            if ansvwer:
+                                print(f'Answer: {pickle.loads(response)[:5]}', end='\n\n')
                         except:
                             pass
                         # conn.sendall(response)
