@@ -33,20 +33,34 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             return
         try:
             if query == None:
-                response_str = False
+                response_str = None
             else:
                 response_str = use_db(**query)
             response = pickle.dumps(response_str)
         except:
             print(f'!!!   Ошибка обработки запроса {message_str}')
             LOG.reliable_send(self.request,pickle.dumps(False))
-            log_errors(message_str)
+            try:
+                log_errors(message_str)
+            except:
+                pass
             return
 
         try:
             LOG.reliable_send(self.request,response)
             try:
-                print(f'Answer: {response_str[:5]}', end='\n\n')
+                if response_str == None:
+                    print(f'Answer: {response_str}', end='\n\n')
+                elif response_str == False:
+                    print(f'Answer: {False}', end='\n\n')
+                else:
+                    try:
+                        if len(str(response_str)) > 50:
+                            print(f'Answer: {str(response_str)[:50] + " ....."}', end='\n\n',)
+                        else:
+                            print(f'Answer: {str(response_str)}', end='\n\n', )
+                    except:
+                        print(f'Answer: {True}', end='\n\n', )
             except:
                 pass
             # conn.sendall(response)
@@ -59,9 +73,9 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             finally:
                 return
 
-def use_db(bd,zapros,shapka = True,spisok_spiskov = [[]],rez_dict=False, one = False, module = '', client = ''):
+def use_db(bd,zapros,shapka = True,spisok_spiskov = (()),rez_dict=False, one = False, module = '', client = '',one_column=False):
     conn, cur = CSQ.connect_bd(bd)
-    res = CSQ.zapros('',zapros,conn=conn,cur=cur,shapka=shapka,spisok_spiskov=spisok_spiskov,rez_dict=rez_dict,one=one)
+    res = CSQ.zapros('',zapros,conn=conn,cur=cur,shapka=shapka,spisok_spiskov=spisok_spiskov,rez_dict=rez_dict,one=one,one_column=one_column)
     CSQ.close_bd(conn,cur)
     return res
 
